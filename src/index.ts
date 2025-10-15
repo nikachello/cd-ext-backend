@@ -1,5 +1,5 @@
 import express from "express";
-import cors from "cors";
+import cors, { CorsOptions, CorsOptionsDelegate } from "cors";
 import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 
@@ -7,28 +7,29 @@ const app = express();
 const port = 3005;
 
 // Allowed origins for CORS
-const allowedOrigins = [
+const allowedOrigins: string[] = [
   "chrome-extension://ilhkfbhlcodigfjhohdnlblpkllboioa",
   "https://app.centraldispatch.com",
   "http://localhost:3000", // optional, for local dev
 ];
 
-// Apply CORS globally
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // allow requests with no origin (like curl or postman)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-  })
-);
+const corsOptionsDelegate: CorsOptionsDelegate = (req, callback) => {
+  const origin = req.headers.origin; // ✅ correct way for CorsRequest
 
+  if (!origin || allowedOrigins.includes(origin)) {
+    const corsOptions: CorsOptions = {
+      origin: true,
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE"],
+    };
+    callback(null, corsOptions);
+  } else {
+    callback(new Error("Not allowed by CORS"), { origin: false });
+  }
+};
+
+// ✅ Apply CORS middleware
+app.use(cors(corsOptionsDelegate));
 // Parse JSON bodies for non-BetterAuth routes
 app.use(express.json());
 
