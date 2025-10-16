@@ -37,7 +37,7 @@ app.use(cors(corsOptionsDelegate));
 app.use(express.json());
 
 // BetterAuth route
-app.all("/api/auth/*", toNodeHandler(auth));
+app.all("/api/auth/{*any}", toNodeHandler(auth));
 
 // Example protected route to get session
 app.get("/api/me", async (req: Request, res: Response) => {
