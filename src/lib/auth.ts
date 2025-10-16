@@ -17,6 +17,7 @@ export const auth = betterAuth({
     "chrome-extension://ilhkfbhlcodigfjhohdnlblpkllboioa",
     "http://localhost:3005",
     "https://app.centraldispatch.com",
+    "https://cd-ext-backend.onrender.com",
   ],
 
   allowedOrigins: [
@@ -24,5 +25,6 @@ export const auth = betterAuth({
     "http://localhost:3000",
     "http://localhost:3005",
     "https://app.centraldispatch.com", // optional, for web dev
+    "https://cd-ext-backend.onrender.com",
   ],
 });

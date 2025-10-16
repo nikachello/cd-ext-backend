@@ -4,13 +4,14 @@ import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
 
 const app = express();
-const port = 3005;
+const port = process.env.PORT || 3005;
 
 // Allowed origins for CORS
 const allowedOrigins: string[] = [
   "chrome-extension://ilhkfbhlcodigfjhohdnlblpkllboioa",
   "https://app.centraldispatch.com",
   "http://localhost:3000", // optional for local dev
+  "https://cd-ext-backend.onrender.com",
 ];
 
 // ✅ Fully typed CORS delegate
