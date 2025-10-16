@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import cors, { CorsOptions, CorsOptionsDelegate } from "cors";
 import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth.js";
@@ -10,11 +10,15 @@ const port = 3005;
 const allowedOrigins: string[] = [
   "chrome-extension://ilhkfbhlcodigfjhohdnlblpkllboioa",
   "https://app.centraldispatch.com",
-  "http://localhost:3000", // optional, for local dev
+  "http://localhost:3000", // optional for local dev
 ];
 
-const corsOptionsDelegate: CorsOptionsDelegate = (req, callback) => {
-  const origin = req.headers.origin; // ✅ correct way for CorsRequest
+// ✅ Fully typed CORS delegate
+const corsOptionsDelegate: CorsOptionsDelegate<Request> = (
+  req: Request,
+  callback: (err: Error | null, options?: CorsOptions) => void
+) => {
+  const origin = req.headers.origin;
 
   if (!origin || allowedOrigins.includes(origin)) {
     const corsOptions: CorsOptions = {
@@ -30,14 +34,13 @@ const corsOptionsDelegate: CorsOptionsDelegate = (req, callback) => {
 
 // ✅ Apply CORS middleware
 app.use(cors(corsOptionsDelegate));
-// Parse JSON bodies for non-BetterAuth routes
 app.use(express.json());
 
 // BetterAuth route
-app.all("/api/auth/*splat", toNodeHandler(auth));
+app.all("/api/auth/*", toNodeHandler(auth));
 
 // Example protected route to get session
-app.get("/api/me", async (req, res) => {
+app.get("/api/me", async (req: Request, res: Response) => {
   try {
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
@@ -50,9 +53,8 @@ app.get("/api/me", async (req, res) => {
 });
 
 // Example protected route
-app.get("/api/protected-data", async (req, res) => {
+app.get("/api/protected-data", async (req: Request, res: Response) => {
   try {
-    console.log("req:", req.headers);
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) return res.status(401).json({ error: "No token provided" });
 
@@ -64,16 +66,15 @@ app.get("/api/protected-data", async (req, res) => {
       user: session!.user,
     });
   } catch (err) {
-    console.error("err-protected-data: ", err);
+    console.error("err-protected-data:", err);
     res.status(401).json({ error: "Invalid token" });
   }
 });
 
-app.get("/api/me-token", async (req, res) => {
+// Example route using token explicitly
+app.get("/api/me-token", async (req: Request, res: Response) => {
   try {
-    console.log("req:", req.headers);
     const token = req.headers.authorization?.split(" ")[1];
-    console.log("token:", token);
     if (!token) return res.status(401).json({ error: "No token provided" });
 
     const session = await auth.api.getSession({
@@ -90,5 +91,5 @@ app.get("/api/me-token", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server listening on http://localhost:${port}`);
+  console.log(`✅ Server listening on http://localhost:${port}`);
 });
