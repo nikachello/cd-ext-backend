@@ -1,0 +1,25 @@
+import { Request } from "express";
+import { CorsOptions, CorsOptionsDelegate } from "cors";
+
+const allowedOrigins: string[] = [
+  "chrome-extension://ilhkfbhlcodigfjhohdnlblpkllboioa",
+  "https://app.centraldispatch.com",
+  "http://localhost:3000",
+  "https://cd-ext-backend.onrender.com",
+];
+
+export const corsOptionsDelegate: CorsOptionsDelegate<Request> = (
+  req,
+  callback
+) => {
+  const origin = req.headers.origin;
+  if (!origin || allowedOrigins.includes(origin)) {
+    callback(null, {
+      origin: true,
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE"],
+    });
+  } else {
+    callback(new Error("Not allowed by CORS"), { origin: false });
+  }
+};

@@ -47,17 +47,4 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/protected-data", (req, res) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: "Unauthorized" });
-
-  const token = authHeader.split(" ")[1];
-  try {
-    jwt.verify(token!, JWT_SECRET);
-    res.json({ message: "This is protected data!" });
-  } catch (err) {
-    res.status(401).json({ error: "Invalid token" });
-  }
-});
-
 export default router;
