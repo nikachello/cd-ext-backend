@@ -1,8 +1,16 @@
-import { Router, Request, Response } from "express";
+// routes/authRoutes.ts
+import { Router } from "express";
+import cors from "cors";
+import { corsOptionsDelegate } from "../middlewares/corsMiddleware";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "../lib/auth";
 
 const router = Router();
 
-// Catch all routes under /api/auth/*
-router.all("/{*any}", (req: Request, res: Response) => {});
+router.use(cors(corsOptionsDelegate));
+
+// ✅ Express uses /* not {*any}
+
+router.all("/{*any}", toNodeHandler(auth));
 
 export default router;

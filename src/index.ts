@@ -1,25 +1,28 @@
 import express from "express";
 import cors from "cors";
-import { corsOptionsDelegate } from "./middlewares/corsMiddleware.js";
-import authRoutes from "./routes/authRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import { PORT } from "./utils/env.js";
+import dotenv from "dotenv";
+import { corsOptionsDelegate } from "./middlewares/corsMiddleware";
+import authRoutes from "./routes/authRoutes";
+import userRoutes from "./routes/userRoutes";
+
+dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 3005;
 
+// Middleware
 app.use(cors(corsOptionsDelegate));
 app.use(express.json());
 
-// BetterAuth route
+// Routes
 app.use("/api/auth", authRoutes);
 
-// Custom routes
 app.use("/api", userRoutes);
 
-// Health check (optional)
-app.get("/", (_, res) => res.send("✅ API running"));
+// Health check
+app.get("/", (_, res) => res.json({ status: "ok" }));
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`✅ Server running on http://localhost:${PORT}`);
+// Server
+app.listen(port, () => {
+  console.log(`✅ Server listening on http://localhost:${port}`);
 });
