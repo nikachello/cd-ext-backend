@@ -6,6 +6,7 @@ const allowedOrigins: string[] = [
   "https://app.centraldispatch.com",
   "http://localhost:3000",
   "https://cd-ext-backend.onrender.com",
+  "http://localhost:3001",
 ];
 
 export const corsOptionsDelegate: CorsOptionsDelegate<Request> = (

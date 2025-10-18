@@ -19,6 +19,7 @@ export const auth = betterAuth({
     "http://localhost:3005",
     "https://app.centraldispatch.com",
     "https://cd-ext-backend.onrender.com",
+    "http://localhost:3001",
   ],
 
   allowedOrigins: [
@@ -27,5 +28,6 @@ export const auth = betterAuth({
     "http://localhost:3005",
     "https://app.centraldispatch.com", // optional, for web dev
     "https://cd-ext-backend.onrender.com",
+    "http://localhost:3001",
   ],
 });

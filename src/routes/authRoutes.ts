@@ -9,8 +9,6 @@ const router = Router();
 
 router.use(cors(corsOptionsDelegate));
 
-// ✅ Express uses /* not {*any}
-
 router.all("/{*any}", toNodeHandler(auth));
 
 export default router;

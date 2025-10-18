@@ -1,31 +1,32 @@
 import { Router, Request, Response } from "express";
 import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "../lib/auth.js";
+import { auth } from "../lib/auth";
 
 const router = Router();
 
 router.get("/me", async (req: Request, res: Response) => {
   try {
+    // Get session from Authorization header or cookies
     const session = await auth.api.getSession({
       headers: fromNodeHeaders(req.headers),
     });
-    return res.json(session);
-  } catch (err) {
-    res.status(401).json({ error: "Not authenticated" });
-  }
-});
 
-router.get("/protected-data", async (req: Request, res: Response) => {
-  try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ error: "No token" });
+    if (!session?.user) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
 
-    const session = await auth.api.getSession({
-      headers: fromNodeHeaders(req.headers),
-    });
-    res.json({ message: "Protected data", user: session?.user });
+    // Return standardized user object
+    const safeUser = {
+      id: session.user.id,
+      email: session.user.email,
+      name: session.user.name,
+      emailVerified: session.user.emailVerified,
+    };
+
+    return res.json(safeUser);
   } catch (err) {
-    res.status(401).json({ error: "Invalid token" });
+    console.error("Error in /api/me:", err);
+    return res.status(401).json({ error: "Not authenticated" });
   }
 });
 
