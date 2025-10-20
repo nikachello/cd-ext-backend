@@ -2,11 +2,14 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
+  "_moduleAliases": {
+    "src": "dist/src"
+  },
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "nodemon dist/index.js",
-    "start": "node dist/index.js",
+    "dev": "nodemon dist/src/index.js",
+    "start": "node dist/src/index.js",
     "test": "jest"
   },
   "type": "commonjs",
@@ -21,8 +24,7 @@
   },
   "exclude": [
     "node_modules, ",
-    "dist",
-    "tests"
+    "dist"
   ],
   "author": "",
   "license": "ISC",
@@ -34,6 +36,7 @@
     "express": "^5.1.0",
     "jest-mock-extended": "^4.0.0",
     "jsonwebtoken": "^9.0.2",
+    "module-alias": "^2.2.3",
     "node-fetch": "^3.3.2",
     "prisma": "^6.17.1",
     "rm": "^0.1.8"

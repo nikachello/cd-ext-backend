@@ -6,7 +6,7 @@
     },
     "target": "es2016",
     "module": "commonjs",
-    "rootDirs": ["./src"],
+    "rootDirs": ["./"],
     "outDir": "./dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,

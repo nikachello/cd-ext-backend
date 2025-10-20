@@ -55,6 +55,6 @@ export const isSuperAdmin = async (
     next();
   } catch (error) {
     console.error("isSuperAdmin error:", error);
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: error });
   }
 };
