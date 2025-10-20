@@ -30,6 +30,7 @@ export async function canManageOrganization(
   res: Response,
   next: NextFunction
 ) {
+  console.log("logged in user: ", req.userId);
   const orgId = req.params.id;
 
   if (!orgId) {
@@ -51,7 +52,7 @@ export async function canManageOrganization(
       where: {
         organizationId: orgId,
         userId: req.userId!,
-        role: { in: ["MANAGER", "ADMIN"] },
+        role: { in: ["MANAGER", "DISPATCHER"] },
       },
     });
 

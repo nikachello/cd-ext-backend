@@ -92,6 +92,12 @@ model Organization {
   @@map("organization")
 }
 
+enum MemberRoles {
+  MANAGER
+  DRIVER
+  DISPATCHER
+}
+
 model Member {
   id             String       @id
   organizationId String

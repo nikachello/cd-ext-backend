@@ -47,6 +47,7 @@ router.get(
   isAuthorized,
   isSuperAdmin,
   asyncHandler(async (req: Request, res: Response) => {
+    console.log(req);
     const data = await prisma.organization.findMany();
     res.status(200).json({ data });
   })
@@ -175,5 +176,87 @@ router.get(
     return res.status(200).json({ members });
   })
 );
+
+// POST /:id/members
+router.post(
+  "/:id/members",
+  isAuthorized,
+  validateOrgId,
+  canManageOrganization,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params; // organization id
+    const { userId, role } = req.body; // role required by better-auth
+
+    if (!userId || !role) {
+      return res.status(400).json({ error: "userId and role are required" });
+    }
+
+    // Optionally validate user exists in your DB
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Use better-auth server API to add the member (server-only API)
+    try {
+      const data = await auth.api.addMember({
+        body: {
+          userId,
+          role, // e.g. "admin" | "member" or custom roles you defined
+          organizationId: id,
+        },
+      });
+
+      // Optionally mirror membership in your own Prisma table if you need a local copy:
+      // await prisma.member.create({ data: { organizationId: id, userId, role } });
+
+      return res.status(201).json({ data });
+    } catch (err: any) {
+      // better-auth returns useful errors (403, 409, ...)
+      return res
+        .status(err?.status || 500)
+        .json({ error: err?.message || "Failed to add member" });
+    }
+  })
+);
+
+router.delete(
+  "/:id/members",
+  isAuthorized,
+  validateOrgId,
+  canManageOrganization,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+    if (!userId || !id)
+      return res.status(400).json({ error: "userId and orgId are required" });
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const org = await prisma.organization.findUnique({ where: { id: id } });
+
+    if (!org) return res.status(404).json({ error: "Organization not found" });
+
+    try {
+      console.log("removing user: ", userId);
+      const data = await auth.api.removeMember({
+        body: {
+          memberIdOrEmail: user.email, // required
+          organizationId: id,
+        },
+        headers: fromNodeHeaders(req.headers),
+      });
+
+      return res.status(200).json({ data });
+    } catch (error: any) {
+      console.log("error:", error);
+      return res
+        .status(error?.statusCode || 500)
+        .json({ error: error?.body?.message || "Failed to remove member" });
+    }
+  })
+);
+
+// TODO: Create role changing endpoint
 
 export default router;
