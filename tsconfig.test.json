@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["jest", "node"], // make jest globals known
+    "noEmit": true // don't output JS files for tests
+  },
+  "include": ["tests/**/*.ts"]
+}

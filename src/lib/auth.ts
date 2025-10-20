@@ -12,7 +12,22 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [bearer(), organization()],
+  plugins: [
+    bearer(),
+    organization({
+      allowUserToCreateOrganization: async (user) => {
+        try {
+          const userData = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { role: true },
+          });
+          return userData?.role === "SUPER_ADMIN";
+        } catch (error) {
+          return false;
+        }
+      },
+    }),
+  ],
   trustedOrigins: [
     "chrome-extension://ilhkfbhlcodigfjhohdnlblpkllboioa",
     "http://localhost:3000",
