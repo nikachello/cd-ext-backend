@@ -1,13 +1,13 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-// If your Prisma file is located elsewhere, you can change the path
 import { PrismaClient } from "@prisma/client";
 import { bearer, organization } from "better-auth/plugins";
 
 const prisma = new PrismaClient();
+
 export const auth = betterAuth({
   database: prismaAdapter(prisma, {
-    provider: "sqlite", // or "mysql", "postgresql", ...etc
+    provider: "sqlite",
   }),
   emailAndPassword: {
     enabled: true,
@@ -35,18 +35,22 @@ export const auth = betterAuth({
     "https://app.centraldispatch.com",
     "https://cd-ext-backend.onrender.com",
     "http://localhost:3001",
-    "https://central-super-hpuhcut2t-nikachellos-projects.vercel.app/",
-    "https://central-super.vercel.app",
-  ],
-
-  allowedOrigins: [
-    "chrome-extension://ilhkfbhlcodigfjhohdnlblpkllboioa",
-    "http://localhost:3000",
-    "http://localhost:3005",
-    "https://app.centraldispatch.com", // optional, for web dev
-    "https://cd-ext-backend.onrender.com",
-    "http://localhost:3001",
     "https://central-super-hpuhcut2t-nikachellos-projects.vercel.app",
     "https://central-super.vercel.app",
   ],
+  // Add this advanced configuration
+  advanced: {
+    cookies: {
+      sessionToken: {
+        name: "__Secure-better-auth.session_token",
+        options: {
+          httpOnly: true,
+          sameSite: "none", // Required for cross-origin (Vercel + Render)
+          secure: true, // Required for production HTTPS
+          path: "/",
+          maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+        },
+      },
+    },
+  },
 });
