@@ -10,6 +10,7 @@ import {
 } from "src/middlewares/organizationMiddleware";
 import { asyncHandler } from "src/lib/helpers/asyncHandler";
 import { findOrganization } from "src/lib/helpers/organisation";
+import { slugify } from "src/lib/helpers/slugify";
 
 interface AuthenticatedRequest extends Request {
   userId?: string;
@@ -21,9 +22,14 @@ const router = Router();
 router.post(
   "/",
   isAuthorized,
-  validateCreateOrg,
   asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    const { name, slug } = req.body;
+    const { name } = req.body;
+
+    if (!name || typeof name !== "string") {
+      return res.status(400).json({ error: "Organization name is required" });
+    }
+
+    const slug = slugify(name);
 
     const existing = await prisma.organization.findUnique({
       where: { slug },
@@ -40,7 +46,6 @@ router.post(
     res.status(201).json({ data });
   })
 );
-
 // Get all organizations (SuperAdmin only)
 router.get(
   "/me",
