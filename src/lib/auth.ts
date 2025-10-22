@@ -38,21 +38,14 @@ export const auth = betterAuth({
     "https://central-super-hpuhcut2t-nikachellos-projects.vercel.app",
     "https://central-super.vercel.app",
   ],
-  // Add this advanced configuration
-  advanced: {
-    cookies: {
-      sessionToken: {
-        name: "__Secure-better-auth.session_token",
-        options: {
-          httpOnly: true,
-          sameSite: "none", // Required for cross-origin (Vercel + Render)
-          secure: true, // Required for production HTTPS
-          path: "/",
-          maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
-        },
-      },
-    },
+  defaultCookieAttributes: {
+    sameSite: "none",
+    secure: true,
+    httpOnly: true,
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7, // 7 days
   },
+  // Add this advanced configuration
 });
 
 console.log("🍪 Better Auth cookie config:", auth); // Add this
