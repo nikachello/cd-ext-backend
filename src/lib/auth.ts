@@ -38,12 +38,11 @@ export const auth = betterAuth({
     "https://central-super-hpuhcut2t-nikachellos-projects.vercel.app",
     "https://central-super.vercel.app",
   ],
-  defaultCookieAttributes: {
-    sameSite: "none",
-    secure: true,
-    httpOnly: true,
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+    },
   },
   // Add this advanced configuration
 });
