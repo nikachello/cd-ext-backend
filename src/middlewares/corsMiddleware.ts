@@ -7,6 +7,7 @@ const allowedOrigins: string[] = [
   "http://localhost:3000",
   "https://cd-ext-backend.onrender.com",
   "http://localhost:3001",
+  "https://central-super-hpuhcut2t-nikachellos-projects.vercel.app",
 ];
 
 export const corsOptionsDelegate: CorsOptionsDelegate<Request> = (
