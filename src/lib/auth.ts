@@ -36,6 +36,7 @@ export const auth = betterAuth({
     "https://cd-ext-backend.onrender.com",
     "http://localhost:3001",
     "https://central-super-hpuhcut2t-nikachellos-projects.vercel.app/",
+    "https://central-super.vercel.app",
   ],
 
   allowedOrigins: [
@@ -46,5 +47,6 @@ export const auth = betterAuth({
     "https://cd-ext-backend.onrender.com",
     "http://localhost:3001",
     "https://central-super-hpuhcut2t-nikachellos-projects.vercel.app",
+    "https://central-super.vercel.app",
   ],
 });
