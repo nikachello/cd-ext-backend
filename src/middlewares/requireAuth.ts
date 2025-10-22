@@ -2,9 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import { auth } from "../lib/auth";
 import { fromNodeHeaders } from "better-auth/node";
 import { prisma } from "../lib/prisma";
+import { UserRole } from "@prisma/client";
 
 interface AuthenticatedRequest extends Request {
   userId?: string;
+  userRole?: UserRole;
 }
 
 export const isAuthorized = async (
@@ -21,7 +23,19 @@ export const isAuthorized = async (
       return res.status(401).json({ error: "Invalid or expired session" });
     }
 
+    const user = await prisma.user.findUnique({
+      where: {
+        id: session.user.id,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     req.userId = session.user.id;
+    req.userRole = user.role;
+
     next();
   } catch (error) {
     console.error("Authorization error:", error);

@@ -7,6 +7,7 @@ import { corsOptionsDelegate } from "./middlewares/corsMiddleware";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import organizationRoutes from "./routes/organizationRoutes";
+import memberRoutes from "./routes/memberRoutes";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api/organizations", organizationRoutes);
+app.use("/api/members", memberRoutes);
 
 // Health check
 app.get("/", (_, res) => res.json({ status: "ok" }));

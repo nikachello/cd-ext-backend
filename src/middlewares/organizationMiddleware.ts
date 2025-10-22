@@ -52,7 +52,7 @@ export async function canManageOrganization(
       where: {
         organizationId: orgId,
         userId: req.userId!,
-        role: { in: ["MANAGER", "DISPATCHER"] },
+        role: { in: ["owner"] },
       },
     });
 

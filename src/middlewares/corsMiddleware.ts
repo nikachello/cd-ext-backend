@@ -18,7 +18,7 @@ export const corsOptionsDelegate: CorsOptionsDelegate<Request> = (
     callback(null, {
       origin: true,
       credentials: true,
-      methods: ["GET", "POST", "PUT", "DELETE"],
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     });
   } else {
     callback(new Error("Not allowed by CORS"), { origin: false });
