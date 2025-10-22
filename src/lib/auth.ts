@@ -54,3 +54,5 @@ export const auth = betterAuth({
     },
   },
 });
+
+console.log("🍪 Better Auth cookie config:", auth); // Add this
