@@ -8,6 +8,8 @@ import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import organizationRoutes from "./routes/organizationRoutes";
 import memberRoutes from "./routes/memberRoutes";
+import planRoutes from "./routes/planRoutes";
+import subscriptionRoutes from "./routes/subscriptionRoutes";
 
 dotenv.config();
 
@@ -22,6 +24,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/members", memberRoutes);
+app.use("/api/plans", planRoutes);
+app.use("/api/subscribe", subscriptionRoutes);
 
 // Health check
 app.get("/", (_, res) => res.json({ status: "ok" }));

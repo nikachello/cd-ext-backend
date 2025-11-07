@@ -71,26 +71,28 @@ model Verification {
 }
 
 model Organization {
-  id          String       @id
-  name        String
-  slug        String       @unique
-  logo        String?
-  createdAt   DateTime
-  metadata    String?
-  invitations Invitation[]
-  members     Member[]
+  id                  String                @id
+  name                String
+  slug                String                @unique
+  logo                String?
+  createdAt           DateTime
+  metadata            String?
+  invitations         Invitation[]
+  members             Member[]
+  CompanySubscription CompanySubscription[]
 
   @@map("organization")
 }
 
 model Member {
-  id             String       @id
+  id             String           @id
   organizationId String
   userId         String
   role           String
   createdAt      DateTime
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  DispatcherSeat DispatcherSeat[]
 
   @@map("member")
 }
@@ -119,4 +121,60 @@ enum MemberRoles {
   MANAGER
   DRIVER
   DISPATCHER
+}
+
+model Plan {
+  id                  String                @id @default(cuid())
+  name                String
+  pricePerSeat        Float // $ per dispatcher per month
+  features            String[] // JSON array or list of features
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @default(now())
+  CompanySubscription CompanySubscription[]
+}
+
+model Invoice {
+  id             String              @id @default(cuid())
+  subscriptionId String
+  month          Int
+  year           Int
+  amount         Float
+  createdAt      DateTime            @default(now())
+  paid           Boolean             @default(false)
+  subscription   CompanySubscription @relation(fields: [subscriptionId], references: [id])
+}
+
+model CompanySubscription {
+  id             String             @id @default(cuid())
+  organizationId String
+  planId         String
+  activeSeats    Int                @default(0)
+  startDate      DateTime           @default(now())
+  endDate        DateTime?
+  status         SubscriptionStatus @default(ACTIVE)
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  plan           Plan               @relation(fields: [planId], references: [id])
+  seats          DispatcherSeat[]
+  invoices       Invoice[]
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @default(now()) @updatedAt
+}
+
+model DispatcherSeat {
+  id             String              @id @default(cuid())
+  memberId       String
+  subscriptionId String
+  active         Boolean             @default(false)
+  startedAt      DateTime            @default(now())
+  endedAt        DateTime?
+  member         Member              @relation(fields: [memberId], references: [id])
+  subscription   CompanySubscription @relation(fields: [subscriptionId], references: [id])
+
+  @@unique([memberId, subscriptionId])
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  PAST_DUE
 }

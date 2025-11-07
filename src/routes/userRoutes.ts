@@ -1,6 +1,4 @@
-import { Router, Request, Response } from "express";
-import { fromNodeHeaders } from "better-auth/node";
-import { auth } from "../lib/auth";
+import { Router, Response } from "express";
 import { asyncHandler } from "src/lib/helpers/asyncHandler";
 import { isAuthorized } from "src/middlewares/requireAuth";
 import { AuthenticatedRequest } from "src/types/requestTypes";

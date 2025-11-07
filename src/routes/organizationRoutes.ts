@@ -5,7 +5,6 @@ import { prisma } from "../lib/prisma";
 import { isAuthorized, isSuperAdmin } from "../middlewares/requireAuth";
 import {
   canManageOrganization,
-  validateCreateOrg,
   validateOrgId,
 } from "src/middlewares/organizationMiddleware";
 import { asyncHandler } from "src/lib/helpers/asyncHandler";
@@ -46,7 +45,8 @@ router.post(
     res.status(201).json({ data });
   })
 );
-// Get all organizations (SuperAdmin only)
+
+// Get user's current organization
 router.get(
   "/me",
   isAuthorized,
@@ -95,45 +95,7 @@ router.get(
   })
 );
 
-router.get(
-  "/role",
-  isAuthorized,
-  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const userId = req.userId;
-
-      if (!userId) {
-        return res.status(401).json({ message: "User not authorized" });
-      }
-
-      // Find membership record for this user
-      const member = await prisma.member.findFirst({
-        where: {
-          userId,
-        },
-        select: {
-          role: true,
-          organizationId: true,
-        },
-      });
-
-      if (!member) {
-        return res
-          .status(404)
-          .json({ message: "User is not a member of any organization" });
-      }
-
-      return res.status(200).json({
-        role: member.role,
-        organizationId: member.organizationId,
-      });
-    } catch (error: any) {
-      console.error("Error getting user role:", error);
-      return res.status(500).json({ message: "Failed to get user role" });
-    }
-  })
-);
-
+// Get all organizations (SUPER ADMIN ONLY)
 router.get(
   "/",
   isAuthorized,
@@ -309,6 +271,9 @@ router.get(
           },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
     return res.status(200).json({ members });
   })
@@ -397,6 +362,34 @@ router.delete(
   })
 );
 
+router.delete(
+  "/:orgId",
+  isAuthorized,
+  isSuperAdmin,
+  asyncHandler(async (req: AuthenticatedRequest, res: Response) => {
+    const { orgId } = req.params;
+    if (!orgId) {
+      return res.status(400).json({ error: "Organization ID is required" });
+    }
+
+    try {
+      const data = await auth.api.deleteOrganization({
+        body: {
+          organizationId: orgId, // required
+        },
+        // This endpoint requires session cookies.
+        headers: fromNodeHeaders(req.headers),
+      });
+
+      return res.status(200).json({ data });
+    } catch (error: any) {
+      return res.status(error?.statusCode || 500).json({
+        error: error?.body?.message || "Failed to remove organisation",
+      });
+    }
+  })
+);
+
 // Toggle extension on or off
 
 router.patch(
@@ -440,20 +433,70 @@ router.patch(
         .status(404)
         .json({ error: "Target user is not in your organization" });
 
-    const targetUser = await prisma.user.findFirst({
-      where: { id: targetUserId },
+    const subscription = await prisma.companySubscription.findFirst({
+      where: { organizationId: orgId, status: "ACTIVE" },
     });
 
-    const updated = await prisma.user.update({
-      where: { id: targetUserId },
-      data: { emailVerified: !targetUser?.emailVerified },
+    if (!subscription)
+      return res
+        .status(400)
+        .json({ error: "No active subscription for the company" });
+
+    const seat = await prisma.dispatcherSeat.findUnique({
+      where: {
+        memberId_subscriptionId: {
+          memberId: targetMembership.id,
+          subscriptionId: subscription.id,
+        },
+      },
     });
+
+    let updatedSeat;
+
+    if (seat) {
+      updatedSeat = await prisma.dispatcherSeat.update({
+        where: {
+          memberId_subscriptionId: {
+            memberId: targetMembership.id,
+            subscriptionId: subscription.id,
+          },
+        },
+        data: { active: !seat.active },
+      });
+    } else {
+      updatedSeat = await prisma.dispatcherSeat.create({
+        data: {
+          memberId: targetMembership.id,
+          subscriptionId: subscription.id,
+          active: true,
+        },
+      });
+    }
+
+    const activeSeatCount = await prisma.dispatcherSeat.count({
+      where: { subscriptionId: subscription.id, active: true },
+    });
+
+    await prisma.companySubscription.update({
+      where: { id: subscription.id },
+      data: { activeSeats: activeSeatCount },
+    });
+
+    // const targetUser = await prisma.user.findFirst({
+    //   where: { id: targetUserId },
+    // });
+
+    // const updated = await prisma.user.update({
+    //   where: { id: targetUserId },
+    //   data: { emailVerified: !targetUser?.emailVerified },
+    // });
 
     res.status(200).json({
-      message: `Member ${
-        updated.emailVerified ? "activated" : "deactivated"
+      message: `Extension for member ${
+        updatedSeat.active ? "enabled" : "disabled"
       } successfully`,
-      member: updated,
+      seat: updatedSeat,
+      activeSeats: activeSeatCount,
     });
   })
 );
