@@ -185,6 +185,11 @@ router.get(
             },
           },
         },
+        CompanySubscription: {
+          include: {
+            plan: true,
+          },
+        },
       },
     });
 

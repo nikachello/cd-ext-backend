@@ -3,6 +3,7 @@ import { CorsOptionsDelegate } from "cors";
 
 const allowedOrigins: string[] = [
   "https://app.centraldispatch.com",
+  "chrome-extension://jglpkabdopehobbihnchllabnlfngebl",
   "http://localhost:3000",
   "http://localhost:3005",
   "https://cd-ext-backend.onrender.com",

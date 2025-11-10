@@ -31,6 +31,7 @@ export const auth = betterAuth({
   trustedOrigins: [
     "chrome-extension://ilhkfbhlcodigfjhohdnlblpkllboioa",
     "chrome-extension://*",
+    "chrome-extension://jglpkabdopehobbihnchllabnlfngebl",
     "http://localhost:3000",
     "http://localhost:3005",
     "https://app.centraldispatch.com",
